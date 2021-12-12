@@ -114,10 +114,10 @@ typedef volatile int hb_mutex_impl_t;
 
 typedef int hb_mutex_impl_t;
 #define HB_MUTEX_IMPL_INIT	0
-#define hb_mutex_impl_init(M)	HB_STMT_START {} HB_STMT_END
-#define hb_mutex_impl_lock(M)	HB_STMT_START {} HB_STMT_END
-#define hb_mutex_impl_unlock(M)	HB_STMT_START {} HB_STMT_END
-#define hb_mutex_impl_finish(M)	HB_STMT_START {} HB_STMT_END
+#define hb_mutex_impl_init(M)	do {} while(0)
+#define hb_mutex_impl_lock(M)	do {} while(0)
+#define hb_mutex_impl_unlock(M)	do {} while(0)
+#define hb_mutex_impl_finish(M)	do {} while(0)
 
 
 #endif

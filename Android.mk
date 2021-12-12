@@ -1,3 +1,8 @@
+#
+# Copyright (C) 2014 MediaTek Inc.
+# Modification based on code covered by the mentioned copyright
+# and/or permission notice(s).
+#
 ##
 ## Copyright (C) 2012 The Android Open Source Project
 ##
@@ -49,12 +54,14 @@
 #
 
 LOCAL_PATH:= $(call my-dir)
+MTK_THAI_SHAPING := 0
 
 HARFBUZZ_SRC_FILES = \
 	src/hb-blob.cc \
 	src/hb-buffer-serialize.cc \
 	src/hb-buffer.cc \
 	src/hb-common.cc \
+        src/hb-debug.c \
 	src/hb-face.cc \
 	src/hb-font.cc \
 	src/hb-ot-tag.cc \
@@ -75,13 +82,32 @@ HARFBUZZ_SRC_FILES = \
 	src/hb-ot-shape-complex-indic.cc \
 	src/hb-ot-shape-complex-indic-table.cc \
 	src/hb-ot-shape-complex-myanmar.cc \
-	src/hb-ot-shape-complex-thai.cc \
 	src/hb-ot-shape-complex-tibetan.cc \
 	src/hb-ot-shape-complex-use.cc \
 	src/hb-ot-shape-complex-use-table.cc \
 	src/hb-ot-shape-normalize.cc \
 	src/hb-ot-shape-fallback.cc \
-	$(NULL)
+    $(NULL)
+
+#        src/hb-old.cc \
+#        src/hb-old/harfbuzz-buffer.c \
+#        src/hb-old/harfbuzz-gdef.c \
+#        src/hb-old/harfbuzz-gpos.c \
+#        src/hb-old/harfbuzz-gsub.c \
+#        src/hb-old/harfbuzz-impl.c \
+#        src/hb-old/harfbuzz-open.c \
+#        src/hb-old/harfbuzz-stream.c \
+#        src/hb-old/harfbuzz-shaper-all.cc \
+#        src/hb-old/harfbuzz-zawgyi.c \
+
+
+ifeq (1, $(MTK_THAI_SHAPING))
+HARFBUZZ_SRC_FILES += \
+                   src/hb-ot-mtk-shape-complex-thai.cc
+else
+HARFBUZZ_SRC_FILES += \
+                   src/hb-ot-shape-complex-thai.cc
+endif
 
 #############################################################
 #   build the harfbuzz shared library
@@ -91,7 +117,7 @@ LOCAL_ARM_MODE := arm
 LOCAL_MODULE_TAGS := optional
 LOCAL_SRC_FILES:= \
 	$(HARFBUZZ_SRC_FILES) \
-	src/hb-icu.cc
+	src/hb-icu.cc 
 LOCAL_CPP_EXTENSION := .cc
 LOCAL_SHARED_LIBRARIES := \
 	libcutils \
@@ -99,9 +125,19 @@ LOCAL_SHARED_LIBRARIES := \
 	libicui18n \
 	libutils \
 	liblog
+
 LOCAL_C_INCLUDES += \
-        $(LOCAL_PATH)/src
-LOCAL_CFLAGS += -DHB_NO_MT -DHAVE_OT -DHAVE_ICU -DHAVE_ICU_BUILTIN -Werror -Wno-unused-parameter \
+        $(LOCAL_PATH)/src \
+        external/icu/icu4c/source/common \
+        $(LOCAL_PATH)/src/hb-old
+
+LOCAL_CFLAGS += -DHB_NO_MT -DHAVE_OT -DHAVE_ICU -DHAVE_ICU_BUILTIN -DHAVE_HB_OLD  -Werror -Wno-unused-parameter \
 	-Wno-missing-field-initializers
+ifneq (,$(filter my_ZG,$(PRODUCT_LOCALES)))
+	LOCAL_CFLAGS += -DZAWGYI_SUPPORT
+endif
+
 LOCAL_MODULE:= libharfbuzz_ng
 include $(BUILD_SHARED_LIBRARY)
+
+include $(call first-makefiles-under,$(LOCAL_PATH))
