@@ -30,10 +30,13 @@
 #define hb_graphite2_shaper_font_data_t gr_font
 #include "hb-shaper-impl-private.hh"
 
+#include <graphite2/Font.h>
 #include "hb-graphite2.h"
 
 #include <graphite2/Segment.h>
 
+#include "hb-ot-tag.h"
+#include "hb-debug.h"
 
 HB_SHAPER_DATA_ENSURE_DECLARE(graphite2, face)
 HB_SHAPER_DATA_ENSURE_DECLARE(graphite2, font)
@@ -219,6 +222,7 @@ _hb_graphite2_shape (hb_shape_plan_t    *shape_plan,
 		     const hb_feature_t *features,
 		     unsigned int        num_features)
 {
+  HBDebug("_hb_graphite2_shape");
   hb_face_t *face = font->face;
   gr_face *grface = HB_SHAPER_DATA_GET (face)->grface;
   gr_font *grfont = HB_SHAPER_DATA_GET (font);
@@ -271,8 +275,10 @@ _hb_graphite2_shape (hb_shape_plan_t    *shape_plan,
   }
 
   scratch = buffer->get_scratch_buffer (&scratch_size);
-  while ((DIV_CEIL (sizeof (hb_graphite2_cluster_t) * buffer->len, sizeof (*scratch)) +
-	  DIV_CEIL (sizeof (hb_codepoint_t) * glyph_count, sizeof (*scratch))) > scratch_size)
+  HBDebug("_hb_graphite2_shape ensure buffer->allocated = %d scratch = %d buffer->len = %d, glyph_count = %d"
+          , buffer->allocated, scratch_size, buffer->len, glyph_count);
+  while ((sizeof (hb_glyph_position_t) * glyph_count +
+	  sizeof (hb_codepoint_t) * glyph_count) > scratch_size)
   {
     buffer->ensure (buffer->allocated * 2);
     if (unlikely (buffer->in_error)) {

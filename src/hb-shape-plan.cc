@@ -59,6 +59,10 @@ hb_shape_plan_plan (hb_shape_plan_t    *shape_plan,
     for (unsigned int i = 0; i < HB_SHAPERS_COUNT; i++)
       if (0)
 	;
+#ifdef ZAWGYI_SUPPORT
+      else if (shape_plan->props.script == HB_SCRIPT_MYANMAR)
+        HB_SHAPER_PLAN (old);
+#endif
 #define HB_SHAPER_IMPLEMENT(shaper) \
       else if (shapers[i].func == _hb_##shaper##_shape) \
 	HB_SHAPER_PLAN (shaper);
